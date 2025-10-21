@@ -4,7 +4,6 @@
 from queue import Queue
 
 class Machine:
-    #TODO: set the machine id as an incrementer value from machine-1, to machine-n
     def __init__(self, id, name):  # It's possible to add another attributes, like  capacity or velocity
         self.id = id
         self.name = name

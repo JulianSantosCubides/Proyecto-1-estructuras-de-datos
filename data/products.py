@@ -5,5 +5,5 @@ productsAndPrices = {
     "Ventana de aluminio": 950000,
     "Reja de seguridad": 1100000,
     "Estantería metálica": 780000,
-    "Tornillos industriales (caja 100 unds)": 150000
+    "Tornillos industriales (caja 100 unid)": 150000
 }

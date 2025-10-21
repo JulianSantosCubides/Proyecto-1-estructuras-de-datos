@@ -52,7 +52,7 @@ def run_program():
 
             order = manager.create_order(product_name, quantity)
 #new code
-            print(f"✅ Orden creada: {product_name}, cantidad {quantity}")
+            print(f"Orden creada: {product_name}, cantidad {quantity}")
 
 #old code
             '''
@@ -76,7 +76,7 @@ def run_program():
         if finished_order:
             # order_history.add_order(finished_order)
             update_progress_bars()
-            print(f"🧾 Orden completada: {finished_order}")
+            print(f"Orden completada: {finished_order}")
         else:
             print("⚠️ No hay órdenes pendientes en esta máquina.")
 
