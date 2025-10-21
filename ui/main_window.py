@@ -1,60 +1,175 @@
-# Import custom tkinter for  user interface
+
+
+
+
 import tkinter
 import customtkinter
 
 # Import components
-from ui.components import CustomLabel, CustomInput, CustomProgressBar, CustomButton, customFrame  # Classes for general texts, inputs, progressBar, buttons and frames
+from ui.components import CustomLabel, CustomMachineLabel, CustomInput, CustomProgressBar, CustomButton, customFrame, CustomSelector
+
+# Import products
+from data.products import productsAndPrices
 
 # Import styles
 from ui.styles import CustomColors
 
+# Import logic
+from logic.machine import Machine
+from logic.orders_manager import OrdersManager
+from logic.order_history import OrderHistory
+
+
 def run_program():
-    root_tk = tkinter.Tk()  # The window
-    root_tk.geometry("800x480")  # Size
-    root_tk.title("Sistema de gestión de producción")  # Window title
+    root_tk = tkinter.Tk()
+    root_tk.geometry("800x480")
+    root_tk.title("Sistema de gestión de producción")
+
+    # --- CREAR LÓGICA PRINCIPAL ---
+    machines = [
+        Machine(1, "Máquina 1"),
+        Machine(2, "Máquina 2"),
+        Machine(3, "Máquina 3"),
+    ]
+
+    order_history = OrderHistory()
+    manager = OrdersManager(machines)
+    manager.order_history = order_history
 
 
-    # Functions
-    def button_event():
-        print("button pressed")
-        text = firstEntry.get()
-        print('texto: ', text)
+    # --- FUNCIONES ---
+    def product_selected(selected_product):
+        try:
+            product = selected_product
+            quantity = int(firstEntry.get()) if firstEntry.get() else 0
+            totalPriceice = productsAndPrices[product] * quantity
+            print(f"Producto: {product}, Cantidad: {quantity}, Precio total: ${totalPriceice:,.0f}")
+        except ValueError:
+            print("⚠️ Ingresa una cantidad válida para seleccionar un producto.")
+
+    def create_order():
+        try:
+            product_name = productSelector.get()
+            quantity = int(firstEntry.get())
+
+            order = manager.create_order(product_name, quantity)
+            assigned = manager.assign_order_to_machine(order)
+            if assigned:
+                print(f"✅ Orden creada y asignada: {product_name}, cantidad {quantity}")
+                update_progress_bars()
+            else:
+                print("❌ Todas las máquinas están llenas, la orden no pudo asignarse.")
+        except ValueError as e:
+            print(f"⚠️ Error: {e}")
+
+    def update_progress_bars():
+        status = manager.update_machines_status()
+        firstMachineProgressbar.set(status["Máquina 1"])
+        secondMachineProgressbar.set(status["Máquina 2"])
+        thirdMachineProgressbar.set(status["Máquina 3"])
+
+    def process_order(machine_index):
+        finished_order = manager.process_next_order(machine_index)
+        if finished_order:
+            order_history.add_order(finished_order)
+            update_progress_bars()
+            print(f"🧾 Orden completada: {finished_order}")
+        else:
+            print("⚠️ No hay órdenes pendientes en esta máquina.")
+
+    def show_order_history():
+        """
+        Muestra una ventana con las órdenes completadas (historial tipo pila).
+        """
+        history_window = customtkinter.CTkToplevel(root_tk)
+        history_window.title("Historial de órdenes completadas")
+        history_window.geometry("400x350")
+
+        title_label = CustomLabel(history_window, "Historial de órdenes completadas")
+        title_label.pack(pady=15)
+
+        # Caja de texto para mostrar el historial
+        history_textbox = customtkinter.CTkTextbox(
+            history_window,
+            width=350,
+            height=220,
+            fg_color=CustomColors.darkGray,
+            text_color="white",
+            corner_radius=8
+        )
+        history_textbox.pack(pady=10)
+
+        # Obtener las órdenes del historial
+        completed_orders = order_history.get_all_orders()  # método que retornará la pila
+
+        if not completed_orders:
+            history_textbox.insert("0.0", "No hay órdenes completadas todavía.")
+        else:
+            for i, order in enumerate(reversed(completed_orders), start=1):
+                order_text = (
+                    f"{i}. {order['producto']} - Cantidad: {order['cantidad']} - "
+                    f"Precio total: ${order['precio_total']:,}\n"
+                )
+                history_textbox.insert("end", order_text)
+
+        history_textbox.configure(state="disabled")  # Hacerlo solo lectura
+
+        CustomButton(history_window, "Cerrar", history_window.destroy).pack(pady=10)
 
 
-    # Introduction text
-    introductionText = 'Bienvenido. Este es un programa para gestionar las ordenes de producción para productos metálicos.'
-
-    # Main label
+    # --- UI PRINCIPAL ---
+    introductionText = 'Bienvenido. Este es un programa para gestionar las órdenes de producción de una manufacturera de productos metálicos.'
     introductionLabel = CustomLabel(root_tk, introductionText)
     introductionLabel.place(relx=0.5, rely=0.1, anchor=tkinter.CENTER)
 
-    # TODO: validate if the priority should be given or calculated based on price or quantity or product type or anything
-    # Inputs
-    firstEntry = CustomInput(root_tk, "Ingresa la cantidad del producto requerido")
-    firstEntry.place(relx=0.5, rely=0.3, anchor=tkinter.CENTER)
+    # Product selector
+    productNames = list(productsAndPrices.keys())
+    selectorLabel = CustomLabel(root_tk, "Selecciona el producto de la orden:")
+    selectorLabel.place(relx=0.5, rely=0.18, anchor=tkinter.CENTER)
+    selected_product = tkinter.StringVar(value=productNames[0])
+    productSelector = CustomSelector(root_tk, productNames, productNames[0], product_selected)
+    productSelector.place(relx=0.5, rely=0.25, anchor=tkinter.CENTER)
 
-    # Buttons
-    createOrderButton = CustomButton(root_tk, "Crear orden de pedido", button_event)
+    # Quantity input
+    firstEntry = CustomInput(root_tk, "Cantidad del producto requerido")
+    firstEntry.place(relx=0.5, rely=0.35, anchor=tkinter.CENTER)
+
+    # Create order button
+    createOrderButton = CustomButton(root_tk, "Asignar orden a maquinaria", create_order)
     createOrderButton.place(relx=0.5, rely=0.45, anchor=tkinter.CENTER)
 
-    # Progress bar
-    progressbar = CustomProgressBar(root_tk)
-    progressbar.place(relx=0.5, rely=0.6, anchor=tkinter.CENTER)
 
-    progressbarValue = 0.7  #  Set this value for progress bar. It can be time, and it can be applied to progress work in machines and be updating each minute or something like that.
-    progressbar.set(progressbarValue)
-
-    #  frame: it can be used to visually represent the machines (3 machines)
+    # --- MÁQUINAS ---
+    # Máquina 1
     firstMachineFrame = customFrame(root_tk)
-    firstMachineFrame.place(relx=0.3, rely=0.75, anchor=tkinter.CENTER)
+    firstMachineFrame.place(relx=0.3, rely=0.7, anchor=tkinter.CENTER)
+    firstMachineFrameName = CustomMachineLabel(root_tk, "Máquina 1")
+    firstMachineFrameName.place(relx=0.3, rely=0.7, anchor="center")
+    firstMachineProgressbar = CustomProgressBar(root_tk)
+    firstMachineProgressbar.place(relx=0.3, rely=0.85, anchor=tkinter.CENTER)
+    CustomButton(root_tk, "Procesar orden", lambda: process_order(0)).place(relx=0.3, rely=0.9, anchor=tkinter.CENTER)
 
-    #  frame for second machine
+    # Máquina 2
     secondMachineFrame = customFrame(root_tk)
-    secondMachineFrame.place(relx=0.5, rely=0.75, anchor=tkinter.CENTER)
+    secondMachineFrame.place(relx=0.5, rely=0.7, anchor=tkinter.CENTER)
+    secondMachineFrameName = CustomMachineLabel(root_tk, "Máquina 2")
+    secondMachineFrameName.place(relx=0.5, rely=0.7, anchor="center")
+    secondMachineProgressbar = CustomProgressBar(root_tk)
+    secondMachineProgressbar.place(relx=0.5, rely=0.85, anchor=tkinter.CENTER)
+    CustomButton(root_tk, "Procesar orden", lambda: process_order(1)).place(relx=0.5, rely=0.9, anchor=tkinter.CENTER)
 
-    #  frame for third machine
+    # Máquina 3
     thirdMachineFrame = customFrame(root_tk)
-    thirdMachineFrame.place(relx=0.7, rely=0.75, anchor=tkinter.CENTER)
+    thirdMachineFrame.place(relx=0.7, rely=0.7, anchor=tkinter.CENTER)
+    thirdMachineFrameName = CustomMachineLabel(root_tk, "Máquina 3")
+    thirdMachineFrameName.place(relx=0.7, rely=0.7, anchor="center")
+    thirdMachineProgressbar = CustomProgressBar(root_tk)
+    thirdMachineProgressbar.place(relx=0.7, rely=0.85, anchor=tkinter.CENTER)
+    CustomButton(root_tk, "Procesar orden", lambda: process_order(2)).place(relx=0.7, rely=0.9, anchor=tkinter.CENTER)
 
-    # run UI
+
+    # --- BOTÓN DE HISTORIAL ---
+    CustomButton(root_tk, "Ver historial de órdenes completadas", show_order_history).place(relx=0.85, rely=0.1, anchor=tkinter.CENTER)
+
+    update_progress_bars()
     root_tk.mainloop()

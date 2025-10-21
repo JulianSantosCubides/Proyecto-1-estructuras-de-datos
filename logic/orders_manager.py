@@ -1,4 +1,88 @@
-from queue import PriorityQueue, Queue
+# It handles all orders and uses priority queues
+# TODO: the price is calculated here
+
+# It handles all orders and uses priority queues
+from logic.order import Order
+from logic.machine import Machine
+from data.products import productsAndPrices
+
+
+class OrdersManager:
+    def __init__(self, machines):
+        self.machines = machines  # Lista de objetos Machine
+        self.order_counter = 1  # ID autoincremental para órdenes
+
+    def create_order(self, product_name, quantity):
+        """
+        Crea una nueva orden y la retorna.
+        Calcula el precio multiplicando la cantidad por el valor unitario.
+        """
+        if product_name not in productsAndPrices:
+            raise ValueError("El producto no existe en la lista de precios.")
+        if quantity <= 0:
+            raise ValueError("La cantidad debe ser mayor que 0.")
+
+        # Calcular precio total
+        unit_price = productsAndPrices[product_name]
+        totalPrice = unit_price * quantity
+
+        # Crear la orden
+        new_order = Order(
+            id=self.order_counter,
+            productName=product_name,
+            quantity=quantity,
+            price=totalPrice
+        )
+
+        # Incrementar contador para la siguiente orden
+        self.order_counter += 1
+        return new_order
+
+    def assign_order_to_machine(self, order):
+        """
+        Busca una máquina con espacio (< 5 órdenes) y le asigna la orden.
+        Si todas las máquinas están llenas, retorna False.
+        """
+        for machine in self.machines:
+            if machine.get_orders_number() < 5:
+                machine.add_orders(order)
+                return True
+        print("Error: No hay máquinas disponibles (todas tiene 5 órdenes).")
+        return False
+
+    def update_machines_status(self):
+        """
+        Retorna un diccionario con el estado actual de las máquinas,
+        para actualizar las progress bars.
+        """
+        status = {}
+        for machine in self.machines:
+            orders = machine.get_orders_number()
+            progress = orders / 5  # máximo 5 órdenes
+            status[machine.name] = progress
+        return status
+
+    def process_next_order(self, machine_index):
+        """
+        Procesa (remueve) la siguiente orden en la máquina indicada.
+        """
+        if machine_index < 0 or machine_index >= len(self.machines):
+            raise IndexError("Índice de máquina inválido.")
+
+        machine = self.machines[machine_index]
+        finished_order = machine.process_next()
+
+        if finished_order:
+            print(f"Orden procesada en {machine.name}: {finished_order.productName}")
+            self.order_history.add_order(finished_order)
+            return finished_order  # TODO: validate if it's necessary to remove this order
+        else:
+            print(f"No hay órdenes pendientes en {machine.name}.")
+            return None
+
+
+## Andres changes
+'''from queue import PriorityQueue, Queue
 from order import Order, calculate_priority
 from machine import Machine
 from order_history import OrderHistory
@@ -195,3 +279,5 @@ class OrdersManager:
             occupied_machines = [m for m in self.all_machines.values() if m not in self.available_machines]
             for machine in occupied_machines:
                 print(f"  - {machine.name} ({machine.id}) con {machine.get_orders_number()} órdenes.")
+                '''
+
