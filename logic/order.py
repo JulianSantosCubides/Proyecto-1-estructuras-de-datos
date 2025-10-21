@@ -12,7 +12,7 @@ class Order:
         self.price = price  # TODO: the price should be calculated when the order is created
         self.priority = calculate_priority(self.price)
         self.status = "pendiente"
-        self.totalPrice = 0
+        self.totalPrice = price
 
 
 #  As the queue handle the priority from highest to lowest.
@@ -20,7 +20,7 @@ class Order:
 def calculate_priority(price):
     if price >= 3000000:
         return 1
-    elif price >= 1500000 and price < 3000000:
+    elif price >= 1500000:
         return 2
-    elif price < 1500000:
+    else:
         return 3
