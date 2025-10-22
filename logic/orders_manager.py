@@ -41,31 +41,44 @@ class OrdersManager:
 
     def assign_all_orders_to_machines(self):
         """
-        Assigns orders from the queue to the available machines following priority (1 > 2 > 3).
-        Assigns as many orders as possible until all machines are full (5 per machine).
+        Asigna órdenes a máquinas según su prioridad:
+        Prioridad 1 -> Máquina 1
+        Prioridad 2 -> Máquina 2
+        Prioridad 3 -> Máquina 3
         """
         assigned = 0
+
         while self.order_queue:
-            # Extract the next order by priority (if there are identical priorities, use the id).
             priority, order_id, order = heapq.heappop(self.order_queue)
 
-            assigned_successfully = False
-            for machine in self.machines:
-                if machine.get_orders_number() < 5:
-                    machine.add_orders(order)
-                    assigned_successfully = True
+            # Determinar máquina según la prioridad (1, 2 o 3)
+            index = min(priority - 1, len(self.machines) - 1)
+            machine = self.machines[index]
+
+            if machine.get_orders_number() < 5:
+                machine.add_orders(order)
+                assigned += 1
+                print(f"Orden {order.id} ({order.productName}) asignada a {machine.name} (Prioridad {priority})")
+            else:
+                # Si la máquina está llena, intentamos otra
+                alternative = None
+                for m in self.machines:
+                    if m.get_orders_number() < 5:
+                        alternative = m
+                        break
+                if alternative:
+                    alternative.add_orders(order)
                     assigned += 1
-                    print(f"⚙️ Orden {order.id} ({order.productName}) asignada a {machine.name} (P{priority})")
+                    print(f"{machine.name} llena. Orden {order.id} reasignada a {alternative.name}")
+                else:
+                    # Si todas están llenas, reinsertar la orden y detener
+                    heapq.heappush(self.order_queue, (priority, order_id, order))
+                    print("Todas las máquinas están llenas. Se detuvo la asignación.")
                     break
 
-            if not assigned_successfully:
-                # If there’s no space available in the machines, the order is reinserted.
-                heapq.heappush(self.order_queue, (priority, order_id, order))
-                print("No hay más espacio en máquinas; se detuvo la asignación.")
-                break
-
         if assigned == 0:
-            print("⚠️ No se asignaron nuevas órdenes (cola vacía o máquinas llenas).")
+            print("No se asignaron nuevas órdenes (cola vacía o máquinas llenas).")
+
         return assigned
 
     def update_machines_status(self):
