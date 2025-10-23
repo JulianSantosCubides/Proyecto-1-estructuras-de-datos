@@ -74,7 +74,7 @@ class customFrame(customtkinter.CTkFrame):
         super().__init__(
             master=master,
             width=100,
-            height=100,
+            height=50,
             corner_radius=10
         )
 
