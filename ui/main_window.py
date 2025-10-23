@@ -19,7 +19,7 @@ from logic.order_history import OrderHistory
 
 def run_program():
     root_tk = tkinter.Tk()
-    root_tk.geometry("800x720")
+    root_tk.geometry("750x800")
     root_tk.title("Sistema de gestión de producción")
 
     # --- CREAR LÓGICA PRINCIPAL ---
@@ -133,58 +133,58 @@ def run_program():
     # --- MÁQUINAS FILA SUPERIOR ---
     # Máquina 1
     firstMachineFrame = customFrame(root_tk)
-    firstMachineFrame.place(relx=0.25, rely=0.58, anchor=tkinter.CENTER)
+    firstMachineFrame.place(relx=0.25, rely=0.50, anchor=tkinter.CENTER)
     firstMachineFrameName = CustomMachineLabel(root_tk, "Máquina 1")
-    firstMachineFrameName.place(relx=0.25, rely=0.55, anchor="center")
+    firstMachineFrameName.place(relx=0.25, rely=0.50, anchor="center")
     firstMachineProgressbar = CustomProgressBar(root_tk)
-    firstMachineProgressbar.place(relx=0.25, rely=0.62, anchor=tkinter.CENTER)
-    CustomButton(root_tk, "Procesar orden", lambda: process_order(2)).place(relx=0.25, rely=0.67, anchor=tkinter.CENTER)
+    firstMachineProgressbar.place(relx=0.25, rely=0.57, anchor=tkinter.CENTER)
+    CustomButton(root_tk, "Procesar orden", lambda: process_order(0)).place(relx=0.25, rely=0.63, anchor=tkinter.CENTER)
 
     # Máquina 2
     secondMachineFrame = customFrame(root_tk)
-    secondMachineFrame.place(relx=0.5, rely=0.58, anchor=tkinter.CENTER)
+    secondMachineFrame.place(relx=0.5, rely=0.50, anchor=tkinter.CENTER)
     secondMachineFrameName = CustomMachineLabel(root_tk, "Máquina 2")
-    secondMachineFrameName.place(relx=0.5, rely=0.55, anchor="center")
+    secondMachineFrameName.place(relx=0.5, rely=0.50, anchor="center")
     secondMachineProgressbar = CustomProgressBar(root_tk)
-    secondMachineProgressbar.place(relx=0.5, rely=0.62, anchor=tkinter.CENTER)
-    CustomButton(root_tk, "Procesar orden", lambda: process_order(2)).place(relx=0.5, rely=0.67, anchor=tkinter.CENTER)
+    secondMachineProgressbar.place(relx=0.5, rely=0.57, anchor=tkinter.CENTER)
+    CustomButton(root_tk, "Procesar orden", lambda: process_order(1)).place(relx=0.5, rely=0.63, anchor=tkinter.CENTER)
 
     # Máquina 3
     thirdMachineFrame = customFrame(root_tk)
-    thirdMachineFrame.place(relx=0.75, rely=0.58, anchor=tkinter.CENTER)
+    thirdMachineFrame.place(relx=0.75, rely=0.50, anchor=tkinter.CENTER)
     thirdMachineFrameName = CustomMachineLabel(root_tk, "Máquina 3")
-    thirdMachineFrameName.place(relx=0.75, rely=0.55, anchor="center")
+    thirdMachineFrameName.place(relx=0.75, rely=0.50, anchor="center")
     thirdMachineProgressbar = CustomProgressBar(root_tk)
-    thirdMachineProgressbar.place(relx=0.75, rely=0.62, anchor=tkinter.CENTER)
-    CustomButton(root_tk, "Procesar orden", lambda: process_order(2)).place(relx=0.75, rely=0.67, anchor=tkinter.CENTER)
+    thirdMachineProgressbar.place(relx=0.75, rely=0.57, anchor=tkinter.CENTER)
+    CustomButton(root_tk, "Procesar orden", lambda: process_order(2)).place(relx=0.75, rely=0.63, anchor=tkinter.CENTER)
 
     # --- MÁQUINAS FILA INFERIOR ---
     # Máquina 4
     fourthMachineFrame = customFrame(root_tk)
-    fourthMachineFrame.place(relx=0.25, rely=0.85, anchor=tkinter.CENTER)
+    fourthMachineFrame.place(relx=0.25, rely=0.75, anchor=tkinter.CENTER)
     fourthMachineFrameName = CustomMachineLabel(root_tk, "Máquina 4")
-    fourthMachineFrameName.place(relx=0.25, rely=0.82, anchor="center")
+    fourthMachineFrameName.place(relx=0.25, rely=0.75, anchor="center")
     fourthMachineProgressbar = CustomProgressBar(root_tk)
-    fourthMachineProgressbar.place(relx=0.25, rely=0.89, anchor=tkinter.CENTER)
-    CustomButton(root_tk, "Procesar orden", lambda: process_order(1)).place(relx=0.25, rely=0.94, anchor=tkinter.CENTER)
+    fourthMachineProgressbar.place(relx=0.25, rely=0.80, anchor=tkinter.CENTER)
+    CustomButton(root_tk, "Procesar orden", lambda: process_order(3)).place(relx=0.25, rely=0.86, anchor=tkinter.CENTER)
 
     # Máquina 5
     fifthMachineFrame = customFrame(root_tk)
-    fifthMachineFrame.place(relx=0.5, rely=0.85, anchor=tkinter.CENTER)
+    fifthMachineFrame.place(relx=0.5, rely=0.75, anchor=tkinter.CENTER)
     fifthMachineFrameName = CustomMachineLabel(root_tk, "Máquina 5")
-    fifthMachineFrameName.place(relx=0.5, rely=0.82, anchor="center")
+    fifthMachineFrameName.place(relx=0.5, rely=0.75, anchor="center")
     fifthMachineProgressbar = CustomProgressBar(root_tk)
-    fifthMachineProgressbar.place(relx=0.5, rely=0.89, anchor=tkinter.CENTER)
-    CustomButton(root_tk, "Procesar orden", lambda: process_order(1)).place(relx=0.5, rely=0.94, anchor=tkinter.CENTER)
+    fifthMachineProgressbar.place(relx=0.5, rely=0.80, anchor=tkinter.CENTER)
+    CustomButton(root_tk, "Procesar orden", lambda: process_order(4)).place(relx=0.5, rely=0.86, anchor=tkinter.CENTER)
 
     # Máquina 6
     sixthMachineFrame = customFrame(root_tk)
-    sixthMachineFrame.place(relx=0.75, rely=0.85, anchor=tkinter.CENTER)
+    sixthMachineFrame.place(relx=0.75, rely=0.75, anchor=tkinter.CENTER)
     sixthMachineFrameName = CustomMachineLabel(root_tk, "Máquina 6")
-    sixthMachineFrameName.place(relx=0.75, rely=0.82, anchor="center")
+    sixthMachineFrameName.place(relx=0.75, rely=0.75, anchor="center")
     sixthMachineProgressbar = CustomProgressBar(root_tk)
-    sixthMachineProgressbar.place(relx=0.75, rely=0.89, anchor=tkinter.CENTER)
-    CustomButton(root_tk, "Procesar orden", lambda: process_order(0)).place(relx=0.75, rely=0.94, anchor=tkinter.CENTER)
+    sixthMachineProgressbar.place(relx=0.75, rely=0.80, anchor=tkinter.CENTER)
+    CustomButton(root_tk, "Procesar orden", lambda: process_order(5)).place(relx=0.75, rely=0.86, anchor=tkinter.CENTER)
 
     # --- BOTÓN DE HISTORIAL ---
     CustomButton(root_tk, "Ver historial de órdenes completadas", show_order_history).place(relx=0.83, rely=0.05, anchor=tkinter.CENTER)
