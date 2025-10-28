@@ -41,46 +41,82 @@ class OrdersManager:
 
     def assign_all_orders_to_machines(self):
         """
-        Asigna órdenes a máquinas según su prioridad:
-        Prioridad 1 -> Máquina 1
-        Prioridad 2 -> Máquina 2
-        Prioridad 3 -> Máquina 3
+        Assigns orders to machines based on order priority.
+        - Priority 1 -> Machines 1,2,3
+        - Priority 2 -> Machines 4,5
+        - Priority 3 -> Machine 6
+        Within each priority group, assign the order to the machine with the fewest pending orders.
+        If all machines in the group are full, try any machine with available capacity.
+        If all machines are full, reinsert the order and stop assigning.
         """
         assigned = 0
-    
+
+        # Helper to determine a machine's configured priority.
+        # First try an explicit attribute 'priority' (if user modified Machine),
+        # otherwise fallback to a mapping by machine id (1-3 -> p1, 4-5 -> p2, 6 -> p3).
+        def machine_priority(m):
+            # if machine has attribute 'priority' and it's 1/2/3, use it
+            p = getattr(m, "priority", None)
+            if isinstance(p, int) and p in (1, 2, 3):
+                return p
+            # fallback mapping by id (safe default)
+            if hasattr(m, "id"):
+                if 1 <= m.id <= 3:
+                    return 1
+                elif 4 <= m.id <= 5:
+                    return 2
+                else:
+                    return 3
+            # final fallback
+            return 1
+
+        # Build groups once per call
+        priority_groups = {
+            1: [m for m in self.machines if machine_priority(m) == 1],
+            2: [m for m in self.machines if machine_priority(m) == 2],
+            3: [m for m in self.machines if machine_priority(m) == 3],
+        }
+
         while self.order_queue:
             priority, order_id, order = heapq.heappop(self.order_queue)
-    
-            # Determinar máquina según la prioridad (1, 2 o 3)
-            index = min(priority - 1, len(self.machines) - 1)
-            machine = self.machines[index]
-    
-            if machine.get_orders_number() < 5:
-                machine.add_orders(order)
-                assigned += 1
-                print(f"Orden {order.id} ({order.productName}) asignada a {machine.name} (Prioridad {priority})")
+
+            # Get machines for this priority
+            group = priority_groups.get(priority, [])
+            if not group:
+                print(f"No machines configured for priority {priority}.")
+                # try fallback: any machine at all
+                group = list(self.machines)
+
+            # Filter machines in group that have capacity (<5)
+            available_in_group = [m for m in group if m.get_orders_number() < 5]
+
+            chosen_machine = None
+
+            if available_in_group:
+                # pick machine with the fewest orders; tie-breaker by machine.id to keep deterministic behavior
+                chosen_machine = min(available_in_group, key=lambda m: (m.get_orders_number(), getattr(m, "id", 0)))
             else:
-                # Si la máquina está llena, intentamos otra
-                alternative = None
-                for m in self.machines:
-                    if m.get_orders_number() < 5:
-                        alternative = m
-                        break
-                if alternative:
-                    alternative.add_orders(order)
-                    assigned += 1
-                    print(f"{machine.name} llena. Orden {order.id} reasignada a {alternative.name}")
+                # group full: try any machine in entire factory with free capacity
+                any_available = [m for m in self.machines if m.get_orders_number() < 5]
+                if any_available:
+                    chosen_machine = min(any_available, key=lambda m: (m.get_orders_number(), getattr(m, "id", 0)))
+                    print(f"All machines for priority {priority} are full. Reassigning order to {chosen_machine.name}.")
                 else:
-                    # Si todas están llenas, reinsertar la orden y detener
+                    # all machines full -> reinsert and stop
                     heapq.heappush(self.order_queue, (priority, order_id, order))
-                    print("Todas las máquinas están llenas. Se detuvo la asignación.")
+                    print("All machines are full. Stopping assignment.")
                     break
-    
+
+            # Assign the order
+            chosen_machine.add_orders(order)
+            assigned += 1
+            print(f"Order {order.id} ({order.productName}) assigned to {chosen_machine.name} (Priority {priority})")
+
         if assigned == 0:
-            print("No se asignaron nuevas órdenes (cola vacía o máquinas llenas).")
-    
+            print("No new orders were assigned (empty queue or all machines full).")
+
         return assigned
-    
+
     def update_machines_status(self):
         status = {}
         for machine in self.machines:
