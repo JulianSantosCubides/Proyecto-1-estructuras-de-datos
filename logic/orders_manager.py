@@ -47,14 +47,14 @@ class OrdersManager:
         Prioridad 3 -> Máquina 3
         """
         assigned = 0
-
+    
         while self.order_queue:
             priority, order_id, order = heapq.heappop(self.order_queue)
-
+    
             # Determinar máquina según la prioridad (1, 2 o 3)
             index = min(priority - 1, len(self.machines) - 1)
             machine = self.machines[index]
-
+    
             if machine.get_orders_number() < 5:
                 machine.add_orders(order)
                 assigned += 1
@@ -75,12 +75,12 @@ class OrdersManager:
                     heapq.heappush(self.order_queue, (priority, order_id, order))
                     print("Todas las máquinas están llenas. Se detuvo la asignación.")
                     break
-
+    
         if assigned == 0:
             print("No se asignaron nuevas órdenes (cola vacía o máquinas llenas).")
-
+    
         return assigned
-
+    
     def update_machines_status(self):
         status = {}
         for machine in self.machines:
